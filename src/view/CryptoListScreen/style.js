@@ -31,4 +31,8 @@ export const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     borderRadius: getScaledRoundedValue(5),
   },
+  loaderContainer: {
+    height: '100%',
+    justifyContent: 'center',
+  },
 });

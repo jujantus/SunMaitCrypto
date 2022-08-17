@@ -65,7 +65,9 @@ export const CryptoListScreen = ({navigation}) => {
             <Text>Hello, {userName}! Welcome to SunMait crypto viewer!</Text>
           </View>
           {isLoading ? (
-            <ActivityIndicator size="large" color="#BF6900" />
+            <View style={styles.loaderContainer}>
+              <ActivityIndicator size="large" color="#BF6900" />
+            </View>
           ) : (
             <FlatList
               contentContainerStyle={styles.flatlistContainer}
