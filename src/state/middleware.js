@@ -1,5 +1,5 @@
 import {createListenerMiddleware} from '@reduxjs/toolkit';
-import {lessThanTenMinutes, lessThanTwoMinutes} from '../common/utils';
+import {lessThanTenMinutes} from '../common/utils';
 import {logIn} from './auth';
 import {setActiveId} from './coins/coinDetail';
 import {getCoinDetailById, getCoinsList} from './coins/thunks';
