@@ -35,4 +35,9 @@ export const styles = StyleSheet.create({
     height: '100%',
     justifyContent: 'center',
   },
+  greetingText: {
+    fontSize: getScaledRoundedValue(15),
+    fontWeight: '600',
+    textAlign: 'center',
+  },
 });

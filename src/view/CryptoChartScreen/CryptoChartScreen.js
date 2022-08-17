@@ -9,6 +9,7 @@ import {getScaledRoundedValue, width} from '../../common/metrics';
 import {clearId, setActiveId} from '../../state/coins/coinDetail';
 import {Timer} from '../../components/Timer/Timer';
 import {ROUTES} from '../../navigation/routes';
+import {styles} from './style';
 
 export const CryptoChartScreen = ({navigation, route}) => {
   const {id} = route.params;
@@ -60,15 +61,17 @@ export const CryptoChartScreen = ({navigation, route}) => {
   return (
     <ScrollView>
       <View style={globalStyles.mainView}>
-        <Text>24 hour price variation for {coinDetail?.detail?.name}</Text>
+        <Text style={styles.headerText}>
+          24 hour price variation for {coinDetail?.detail?.name}
+        </Text>
         {coinDetail.numberOfRequests < 5 && (
-          <View>
+          <View style={styles.timerContainer}>
             <Timer
               cicleLimit={5}
               currentCicle={coinDetail.numberOfRequests}
               cicleSeconds={30}
             />
-            <Text>seconds until next update</Text>
+            <Text style={styles.timerText}>seconds until next update</Text>
           </View>
         )}
         {coinDetail.loading || !hoursArray.length || !pricesArray.length ? (

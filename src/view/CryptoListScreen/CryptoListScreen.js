@@ -83,7 +83,9 @@ export const CryptoListScreen = ({navigation}) => {
       <View style={globalStyles.mainView}>
         <View style={globalStyles.mainContainer}>
           <View style={styles.topContainer}>
-            <Text>Hello, {userName}! Welcome to SunMait crypto viewer!</Text>
+            <Text style={styles.greetingText}>
+              Hello, {userName}! Welcome to SunMait crypto viewer!
+            </Text>
           </View>
           {isLoading ? (
             <View style={styles.loaderContainer}>
@@ -118,7 +120,7 @@ export const CryptoListScreen = ({navigation}) => {
           <PillButton text={'Reset'} onPress={resetFilter} />
         </View>
         <View style={globalStyles.flexContainer}>
-          <Text ellipsizeMode="tail">Not {userName}?</Text>
+          <Text>Not {userName}?</Text>
           <PillButton text={'Log out'} onPress={() => dispatch(logOut())} />
         </View>
       </View>
