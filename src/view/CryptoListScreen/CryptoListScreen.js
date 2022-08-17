@@ -1,10 +1,11 @@
 import React, {useEffect, useState} from 'react';
-
-import {View, Text, ActivityIndicator, FlatList, TextInput} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
-import {globalStyles} from '../../common/styles';
+import NetInfo from '@react-native-community/netinfo';
+import {View, Text, ActivityIndicator, FlatList, TextInput} from 'react-native';
+
 import {CoinButton} from '../../components/CoinButton/CoinButton';
 import {PillButton} from '../../components/PillButton/PillButton';
+import {globalStyles} from '../../common/styles';
 import {ROUTES} from '../../navigation/routes';
 import {logOut} from '../../state/auth';
 import {styles} from './style';
@@ -17,6 +18,25 @@ export const CryptoListScreen = ({navigation}) => {
 
   const [filteredCoins, setFilteredCoins] = useState(coinsList);
   const [filter, setFilter] = useState('');
+  const [offline, setOffline] = useState(false);
+
+  useEffect(() => {
+    const removeNetInfoSubscription = NetInfo.addEventListener(state => {
+      if (!state.isConnected || state.isInternetReachable === false) {
+        setOffline(true);
+      } else {
+        setOffline(false);
+      }
+    });
+
+    return () => removeNetInfoSubscription();
+  }, []);
+
+  useEffect(() => {
+    if (offline) {
+      navigation.navigate(ROUTES.LOST_CONNECTION_MODAL);
+    }
+  }, [offline, navigation]);
 
   useEffect(() => {
     setFilteredCoins(coinsList);
@@ -26,6 +46,7 @@ export const CryptoListScreen = ({navigation}) => {
   const renderItem = ({item}) => {
     return (
       <CoinButton
+        disabled={offline}
         coin={item}
         onPress={() =>
           navigation.navigate(ROUTES.CRYPTO_CHART, {

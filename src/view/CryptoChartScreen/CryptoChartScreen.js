@@ -1,12 +1,14 @@
-import React, {useEffect, useRef, useState} from 'react';
-
+import React, {useEffect, useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import NetInfo from '@react-native-community/netinfo';
 import {ScrollView, View, Text, ActivityIndicator} from 'react-native';
+
 import {globalStyles} from '../../common/styles';
 import {LineChart} from 'react-native-chart-kit';
 import {getScaledRoundedValue, width} from '../../common/metrics';
-import {useDispatch, useSelector} from 'react-redux';
 import {clearId, setActiveId} from '../../state/coins/coinDetail';
 import {Timer} from '../../components/Timer/Timer';
+import {ROUTES} from '../../navigation/routes';
 
 export const CryptoChartScreen = ({navigation, route}) => {
   const {id} = route.params;
@@ -16,6 +18,25 @@ export const CryptoChartScreen = ({navigation, route}) => {
 
   const [pricesArray, setPricesArray] = useState([]);
   const [hoursArray, setHoursArray] = useState([]);
+  const [offline, setOffline] = useState(false);
+
+  useEffect(() => {
+    const removeNetInfoSubscription = NetInfo.addEventListener(state => {
+      if (!state.isConnected || state.isInternetReachable === false) {
+        setOffline(true);
+      } else {
+        setOffline(false);
+      }
+    });
+
+    return () => removeNetInfoSubscription();
+  }, []);
+
+  useEffect(() => {
+    if (offline) {
+      navigation.navigate(ROUTES.LOST_CONNECTION_MODAL);
+    }
+  }, [offline, navigation]);
 
   useEffect(() => {
     dispatch(setActiveId(id));
