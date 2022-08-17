@@ -4,9 +4,13 @@ import {logIn} from './auth';
 import {setActiveId} from './coins/coinDetail';
 import {getCoinDetailById, getCoinsList} from './coins/thunks';
 
-const listenerMiddleware = createListenerMiddleware();
+const coinListListener = createListenerMiddleware();
 
-listenerMiddleware.startListening({
+const coinDetailListener = createListenerMiddleware();
+
+let timeout;
+
+coinListListener.startListening({
   actionCreator: logIn,
   effect: async (_, listenerApi) => {
     const state = listenerApi.getState();
@@ -21,31 +25,29 @@ listenerMiddleware.startListening({
   },
 });
 
-listenerMiddleware.startListening({
+coinDetailListener.startListening({
   actionCreator: setActiveId,
   effect: async (_, listenerApi) => {
     const state = listenerApi.getState();
-    if (
-      state.coins?.detail?.lastRequestTimestamp &&
-      lessThanTwoMinutes(state.coins.list.lastRequestTimestamp)
-    ) {
-      return;
-    }
     listenerApi.dispatch(getCoinDetailById(state.coins?.detail?.activeId));
   },
 });
 
-listenerMiddleware.startListening({
+coinDetailListener.startListening({
   actionCreator: getCoinDetailById.fulfilled,
   effect: async (_, listenerApi) => {
     const state = listenerApi.getState();
-    if (state.coins?.detail?.numberOfRequests > 4) {
-      return;
+    if (
+      state.coins?.detail?.numberOfRequests > 4 ||
+      !state.coins?.detail?.activeId
+    ) {
+      return coinDetailListener.clearListeners();
     }
-    setTimeout(() => {
+    timeout = setTimeout(() => {
       listenerApi.dispatch(getCoinDetailById(state.coins?.detail?.activeId));
+      clearTimeout(timeout);
     }, 30000);
   },
 });
 
-export default listenerMiddleware;
+export {coinDetailListener, coinListListener};
