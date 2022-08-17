@@ -6,17 +6,16 @@ import {LineChart} from 'react-native-chart-kit';
 import {getScaledRoundedValue, width} from '../../common/metrics';
 import {useDispatch, useSelector} from 'react-redux';
 import {clearId, setActiveId} from '../../state/coins/coinDetail';
+import {Timer} from '../../components/Timer/Timer';
 
 export const CryptoChartScreen = ({navigation, route}) => {
   const {id} = route.params;
 
-  const [seconds, setSeconds] = useState(null);
-  const [newPrice, setNewPrice] = useState(0);
-
-  const updateInterval = useRef();
-
   const coinDetail = useSelector(state => state.coins?.detail);
   const dispatch = useDispatch();
+
+  const [pricesArray, setPricesArray] = useState([]);
+  const [hoursArray, setHoursArray] = useState([]);
 
   useEffect(() => {
     dispatch(setActiveId(id));
@@ -27,53 +26,52 @@ export const CryptoChartScreen = ({navigation, route}) => {
   }, [dispatch, id]);
 
   useEffect(() => {
-    clearInterval(updateInterval.current);
-    if (coinDetail.numberOfRequests > 4) {
-      return;
-    }
-    setSeconds(30);
-    updateInterval.current = setInterval(() => {
-      if (seconds > 0) {
-        setSeconds(prevSeconds => prevSeconds - 1);
-      }
-    }, 1000);
-  }, [coinDetail]);
-
-  useEffect(() => {
     const parsedPrice = parseInt(coinDetail?.detail?.price_usd, 10);
     if (isNaN(parsedPrice)) {
       return;
     }
-    setNewPrice(parsedPrice);
+    setPricesArray(prevPricesArray => prevPricesArray.concat([parsedPrice]));
+    setHoursArray(prevHoursArray =>
+      prevHoursArray.concat([new Date().toLocaleTimeString('en-US')]),
+    );
   }, [coinDetail.detail]);
 
   return (
     <ScrollView>
       <View style={globalStyles.mainView}>
         <Text>24 hour price variation for {coinDetail?.detail?.name}</Text>
-        <Text>{seconds} seconds until next update</Text>
-        {coinDetail.loading ? (
+        {coinDetail.numberOfRequests < 5 && (
+          <View>
+            <Timer
+              cicleLimit={5}
+              currentCicle={coinDetail.numberOfRequests}
+              cicleSeconds={30}
+            />
+            <Text>seconds until next update</Text>
+          </View>
+        )}
+        {coinDetail.loading || !hoursArray.length || !pricesArray.length ? (
           <ActivityIndicator size="large" color="#BF6900" />
         ) : (
           <LineChart
             data={{
-              labels: ['ayer', 'ahora'],
+              labels: hoursArray,
               datasets: [
                 {
-                  data: [newPrice, newPrice],
+                  data: pricesArray,
                 },
               ],
             }}
             width={width}
             height={getScaledRoundedValue(400)}
             yAxisLabel="$"
-            yAxisSuffix="k"
             yAxisInterval={1}
+            yax
             chartConfig={{
               backgroundColor: '#e26a00',
               backgroundGradientFrom: '#fb8c00',
               backgroundGradientTo: '#ffa726',
-              decimalPlaces: 2, // optional, defaults to 2dp
+              decimalPlaces: 0,
               color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
               labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
               style: {
@@ -87,7 +85,7 @@ export const CryptoChartScreen = ({navigation, route}) => {
             }}
             bezier
             style={{
-              marginVertical: 8,
+              marginVertical: 20,
               borderRadius: 16,
             }}
           />
