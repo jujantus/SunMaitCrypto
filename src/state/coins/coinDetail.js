@@ -6,7 +6,6 @@ const initialState = {
   detail: null,
   loading: false,
   error: null,
-  lastRequestTimestamp: null,
   activeId: null,
   numberOfRequests: 0,
 };
@@ -42,7 +41,6 @@ export const coinDetailSlice = createSlice({
         state.loading = false;
         state.detail = action.payload[0];
         state.numberOfRequests = state.numberOfRequests + 1;
-        state.lastRequestTimestamp = Date.now();
       });
   },
 });

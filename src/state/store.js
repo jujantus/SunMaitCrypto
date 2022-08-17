@@ -14,29 +14,37 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import authReducer from './auth';
 import coinsReducer from './coins';
-import listenerMiddleware from './middleware';
+import {coinListListener, coinDetailListener} from './middleware';
+
+const rootPersistConfig = {
+  key: 'root',
+  storage: AsyncStorage,
+  blacklist: [STATE_MODULES.COINS],
+};
+
+const coinsPersistConfig = {
+  key: STATE_MODULES.COINS,
+  storage: AsyncStorage,
+  blacklist: [STATE_MODULES.COIN_DETAIL],
+};
 
 const rootReducer = combineReducers({
   [STATE_MODULES.AUTH]: authReducer,
-  [STATE_MODULES.COINS]: coinsReducer,
+  [STATE_MODULES.COINS]: persistReducer(coinsPersistConfig, coinsReducer),
 });
 
-const persistConfig = {
-  key: 'root',
-  storage: AsyncStorage,
-};
-
-const persistedReducer = persistReducer(persistConfig, rootReducer);
+const persistedRootReducer = persistReducer(rootPersistConfig, rootReducer);
 
 const store = configureStore({
-  reducer: persistedReducer,
+  reducer: persistedRootReducer,
   middleware: getDefaultMiddleware => {
     const middlewares = getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
     });
-    middlewares.push(listenerMiddleware.middleware);
+    middlewares.push(coinListListener.middleware);
+    middlewares.push(coinDetailListener.middleware);
     return middlewares;
   },
 });
