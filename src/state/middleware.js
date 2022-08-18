@@ -1,7 +1,7 @@
 import {createListenerMiddleware} from '@reduxjs/toolkit';
 import {lessThanTenMinutes} from '../common/utils';
 import {logIn} from './auth';
-import {setActiveId} from './coins/coinDetail';
+import {clearId, setActiveId} from './coins/coinDetail';
 import {getCoinDetailById, getCoinsList} from './coins/thunks';
 
 const coinListListener = createListenerMiddleware();
@@ -34,6 +34,13 @@ coinDetailListener.startListening({
 });
 
 coinDetailListener.startListening({
+  actionCreator: clearId,
+  effect: async () => {
+    clearTimeout(timeout);
+  },
+});
+
+coinDetailListener.startListening({
   actionCreator: getCoinDetailById.fulfilled,
   effect: async (_, listenerApi) => {
     const state = listenerApi.getState();
@@ -41,7 +48,7 @@ coinDetailListener.startListening({
       state.coins?.detail?.numberOfRequests > 4 ||
       !state.coins?.detail?.activeId
     ) {
-      return coinDetailListener.clearListeners();
+      return;
     }
     timeout = setTimeout(() => {
       listenerApi.dispatch(getCoinDetailById(state.coins?.detail?.activeId));
